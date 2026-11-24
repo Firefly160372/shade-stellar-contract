@@ -15,6 +15,7 @@ fixtures:
 
 fixtures-check: fixtures
 	@git diff --exit-code src/tests/fixtures/account.wasm || (echo "ERROR: src/tests/fixtures/account.wasm is stale. Run 'make fixtures' and commit the result." && exit 1)
+	@echo "OK: src/tests/fixtures/account.wasm is up to date with the account source."
 
 fmt:
 	cargo fmt --all

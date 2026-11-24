@@ -28,3 +28,9 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files
 
+      - name: Verify committed account.wasm fixture is up to date
+        run: |
+          make fixtures
+          git diff --exit-code contracts/shade/src/tests/fixtures/account.wasm || \
+            (echo "::error::account.wasm fixture is stale. Run 'make fixtures' and commit the result." && exit 1)
+
