@@ -44,6 +44,15 @@ jobs:
       - name: Rebuild account fixture
         run: make fixtures
 
+      - name: Verify committed account fixture is up to date
+        run: |
+          make fixtures
+          if ! git diff --exit-code contracts/shade/src/tests/fixtures/account.wasm; then
+            echo "::error file=contracts/shade/src/tests/fixtures/account.wasm::The committed account.wasm fixture is stale."
+            echo "Run 'make fixtures' and commit the updated contracts/shade/src/tests/fixtures/account.wasm."
+            exit 1
+          fi
+
       - name: Run tests
         run: cargo test --workspace --all-features
       

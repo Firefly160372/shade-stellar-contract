@@ -30,7 +30,7 @@ STELLAR_DIR = .stellar
 	deploy-shade deploy-account deploy-all \
 	init-shade \
 	pause-shade unpause-shade upgrade-shade \
-	check-admin check-network docs docs-serve docs-check
+	check-admin check-network check-fixtures docs docs-serve docs-check
 
 # ============================================================================
 # Default Target
@@ -81,6 +81,18 @@ fmt: ## Format code
 fixtures: ## Rebuild the account WASM fixture used by shade's tests
 	@cargo build -p account --target wasm32v1-none --release
 	@cp target/wasm32v1-none/release/account.wasm contracts/shade/src/tests/fixtures/account.wasm
+
+check-fixtures: ## Fail if the committed account fixture is stale (run `make fixtures` to fix)
+	@$(MAKE) --no-print-directory fixtures
+	@if ! git diff --exit-code -- contracts/shade/src/tests/fixtures/account.wasm >/dev/null; then \
+		echo ""; \
+		echo "ERROR: contracts/shade/src/tests/fixtures/account.wasm is stale."; \
+		echo "The committed fixture does not match the current 'account' source."; \
+		echo "FIX: run 'make fixtures' and commit the updated fixture."; \
+		echo ""; \
+		exit 1; \
+	fi
+	@echo "Fixture account.wasm is up to date."
 
 lint: ## Run clippy linter
 	@echo "Running clippy..."
@@ -253,5 +265,5 @@ docs-serve: ## Preview the docs site locally
 docs-check: ## Run docs link checks
 	@lychee --config lychee.toml docs README.md CONTRIBUTING.md
 
-ci: lint test build ## CI pipeline (lint, test, build)
+ci: lint check-fixtures test build ## CI pipeline (lint, fixture check, test, build)
 	@echo "CI pipeline complete!"
